@@ -1,21 +1,127 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>QQ 音乐API</title>
+  <title>音乐房间 - QQ音乐同步听歌</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+    .container {
+      text-align: center;
+      max-width: 600px;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .subtitle {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    .buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 15px 30px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    .btn.primary {
+      background: #ff6b6b;
+      border-color: #ff6b6b;
+    }
+    .btn.primary:hover {
+      background: #ff5252;
+      border-color: #ff5252;
+    }
+    .features {
+      margin-top: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .feature {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .feature h3 {
+      margin-top: 0;
+      color: #ffeb3b;
+    }
+  </style>
 </head>
 <body>
-  <h1>QQ 音乐API</h1>
-  当你看到这个页面时,这个服务已经成功跑起来了~
-  <a href="https://rain120.github.io/qq-music-api/">查看文档</a>
-  <h2>例子:</h2>
-  <ul>
-    <li>1. <a href="/getHotkey">搜索热词</a></li>
-    <li>2. <a href="/getSongLists?categoryId=10000000">歌单列表</a></li>
-    <li>3. <a href="/getSearchByKey?key=周杰伦">获取搜索结果</a></li>
-  </ul>
+  <div class="container">
+    <h1>🎵 音乐房间</h1>
+    <p class="subtitle">QQ音乐同步听歌平台 - 与朋友一起享受音乐</p>
+    
+    <div class="buttons">
+      <a href="/room.html" class="btn primary">🎶 进入音乐房间</a>
+      <a href="/music-player.html" class="btn">🎧 音乐播放器</a>
+      <a href="https://rain120.github.io/qq-music-api/" class="btn" target="_blank">📖 API文档</a>
+    </div>
+    
+    <div class="features">
+      <div class="feature">
+        <h3>🎵 同步播放</h3>
+        <p>多人同时听歌，完美同步</p>
+      </div>
+      <div class="feature">
+        <h3>💬 实时聊天</h3>
+        <p>边听歌边聊天交流</p>
+      </div>
+      <div class="feature">
+        <h3>🔍 智能搜索</h3>
+        <p>快速找到喜欢的音乐</p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // 3秒后自动跳转到音乐房间
+    setTimeout(() => {
+      window.location.href = '/room.html';
+    }, 5000);
+  </script>
+</body>
+</html>
   <style>
     html,body{
       height: 100vh;
