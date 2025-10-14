@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>播放链接调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .result {
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: #2196f3;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <h1>播放链接调试工具</h1>
+    
+    <div>
+        <button onclick="testSearch()">测试搜索</button>
+        <button onclick="testPlay()">测试播放链接</button>
+        <button onclick="testAudio()">测试音频播放</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px;"></audio>
+    
+    <script>
+        const apiBase = window.location.origin;
+        let currentSong = null;
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        async function testSearch() {
+            try {
+                log('开始搜索周杰伦...');
+                const response = await fetch(`${apiBase}/getSearchByKey?key=周杰伦`);
+                const data = await response.json();
+                
+                if (data.response && data.response.code === 0) {
+                    const songs = data.response.data.song.list;
+                    if (songs && songs.length > 0) {
+                        currentSong = songs[0];
+                        log(`找到歌曲: ${currentSong.songname} - ${currentSong.singer[0].name}`, 'success');
+                        log(`Songmid: ${currentSong.songmid}`);
+                    } else {
+                        log('没有找到歌曲', 'error');
+                    }
+                } else {
+                    log(`搜索失败: ${JSON.stringify(data)}`, 'error');
+                }
+            } catch (error) {
+                log(`搜索错误: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testPlay() {
+            if (!currentSong) {
+                log('请先搜索歌曲', 'error');
+                return;
+            }
+            
+            try {
+                log(`获取播放链接: ${currentSong.songmid}...`);
+                const response = await fetch(`${apiBase}/getMusicPlay?songmid=${currentSong.songmid}`);
+                const data = await response.json();
+                
+                log(`API响应: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.data && data.data.playUrl && data.data.playUrl[currentSong.songmid]) {
+                    const playInfo = data.data.playUrl[currentSong.songmid];
+                    
+                    log(`播放信息: ${JSON.stringify(playInfo, null, 2)}`);
+                    
+                    // 检查错误
+                    if (playInfo.error) {
+                        log(`API返回错误: ${playInfo.error}`, 'error');
+                        return;
+                    }
+                    
+                    // 检查URL
+                    if (playInfo.url) {
+                        log(`播放链接: ${playInfo.url}`, 'success');
+                        return playInfo.url;
+                    } else {
+                        log('播放链接为空', 'error');
+                    }
+                } else {
+                    log('API响应格式错误', 'error');
+                }
+            } catch (error) {
+                log(`获取播放链接错误: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAudio() {
+            if (!currentSong) {
+                log('请先搜索歌曲', 'error');
+                return;
+            }
+            
+            try {
+                const playUrl = await testPlay();
+                if (playUrl) {
+                    log('设置音频源...');
+                    const audio = document.getElementById('audioPlayer');
+                    audio.src = playUrl;
+                    
+                    audio.addEventListener('loadstart', () => {
+                        log('音频开始加载', 'success');
+                    });
+                    
+                    audio.addEventListener('canplay', () => {
+                        log('音频可以播放', 'success');
+                    });
+                    
+                    audio.addEventListener('error', (e) => {
+                        log(`音频加载错误: ${e.message}`, 'error');
+                    });
+                    
+                    audio.load();
+                }
+            } catch (error) {
+                log(`音频测试错误: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
