@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>同步听歌房间</title>
+    <link rel="stylesheet" href="room.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 房间入口页面 -->
+        <div class="entry-page" id="entryPage">
+            <div class="entry-container">
+                <h1>🎵 同步听歌房间</h1>
+                <p class="subtitle">与朋友一起同步听歌，分享音乐的美好</p>
+                
+                <div class="entry-form">
+                    <div class="form-group">
+                        <input type="text" id="userName" placeholder="输入你的昵称" class="form-input" required>
+                    </div>
+                    <button id="enterRoomBtn" class="btn btn-primary">进入听歌房间</button>
+                </div>
+                
+                <div class="room-info">
+                    <p>🎵 这是一个固定的听歌房间</p>
+                    <p>📱 分享链接给朋友，大家一起同步听歌</p>
+                    <p>💬 可以实时聊天互动</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 房间页面 -->
+        <div class="room-page" id="roomPage" style="display: none;">
+            <header class="room-header">
+                <div class="room-info">
+                    <h2 id="roomTitle">同步听歌房间</h2>
+                    <span class="user-count">在线: <span id="userCount">1</span>人</span>
+                </div>
+                <div class="room-actions">
+                    <button id="shareRoomBtn" class="btn btn-small">分享房间</button>
+                    <button id="leaveRoomBtn" class="btn btn-small btn-danger">离开房间</button>
+                </div>
+            </header>
+
+            <main class="room-main">
+                <div class="left-panel">
+                    <!-- 搜索区域 -->
+                    <div class="search-section">
+                        <div class="search-container">
+                            <input type="text" id="searchInput" placeholder="搜索歌曲、歌手..." class="search-input">
+                            <button id="searchBtn" class="search-btn">搜索</button>
+                        </div>
+                        <div class="search-results" id="searchResults">
+                            <div class="welcome-message">
+                                <p>搜索歌曲并添加到播放列表</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 聊天区域 -->
+                    <div class="chat-section">
+                        <div class="chat-header">
+                            <h3>聊天</h3>
+                        </div>
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="system-message">
+                                <p>欢迎来到听歌房间！</p>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="chatInput" placeholder="输入消息..." class="chat-text-input">
+                            <button id="sendMessageBtn" class="chat-send-btn">发送</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <!-- 播放列表 -->
+                    <div class="playlist-section">
+                        <div class="playlist-header">
+                            <h3>播放列表</h3>
+                            <button id="clearPlaylist" class="clear-btn">清空</button>
+                        </div>
+                        <div class="playlist" id="playlist">
+                            <div class="empty-playlist">
+                                <p>播放列表为空</p>
+                                <p>搜索歌曲并添加到播放列表</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 在线用户 -->
+                    <div class="users-section">
+                        <div class="users-header">
+                            <h3>在线用户</h3>
+                        </div>
+                        <div class="users-list" id="usersList">
+                            <div class="user-item">
+                                <span class="user-avatar">👤</span>
+                                <span class="user-name">加载中...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- 播放器 -->
+            <div class="player-section" id="playerSection" style="display: none;">
+                <div class="current-song">
+                    <div class="song-info">
+                        <img id="songImage" src="" alt="专辑封面" class="album-cover">
+                        <div class="song-details">
+                            <h3 id="songTitle">歌曲标题</h3>
+                            <p id="songArtist">歌手</p>
+                            <p id="songAlbum">专辑</p>
+                        </div>
+                    </div>
+                    <div class="player-controls">
+                        <div class="control-buttons">
+                            <button id="prevBtn" class="control-btn" title="上一首">⏮</button>
+                            <button id="playPauseBtn" class="control-btn play-pause" title="播放/暂停">▶</button>
+                            <button id="nextBtn" class="control-btn" title="下一首">⏭</button>
+                        </div>
+                        <div class="progress-container">
+                            <span id="currentTime">0:00</span>
+                            <div class="progress-bar">
+                                <div class="progress" id="progress"></div>
+                                <input type="range" id="progressSlider" min="0" max="100" value="0" class="progress-slider">
+                            </div>
+                            <span id="duration">0:00</span>
+                        </div>
+                        <div class="volume-container">
+                            <span class="volume-icon">🔊</span>
+                            <input type="range" id="volumeSlider" min="0" max="100" value="50" class="volume-slider">
+                            <span id="volumeValue">50%</span>
+                        </div>
+                        <div class="play-info">
+                            <span id="playStatus">准备播放</span>
+                        </div>
+                    </div>
+                </div>
+                <audio id="audioPlayer" preload="none">
+                    您的浏览器不支持音频播放
+                </audio>
+            </div>
+        </div>
+
+        <!-- 加载提示 -->
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p id="loadingText">正在加载...</p>
+        </div>
+
+        <!-- 错误提示 -->
+        <div class="error-toast" id="errorToast" style="display: none;">
+            <span id="errorMessage"></span>
+        </div>
+    </div>
+
+    <script src="room.js"></script>
+</body>
+</html>

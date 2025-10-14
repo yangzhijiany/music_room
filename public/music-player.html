@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QQ音乐播放器</title>
+    <link rel="stylesheet" href="music-player.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎵 QQ音乐播放器</h1>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="搜索歌曲、歌手..." class="search-input">
+                <button id="searchBtn" class="search-btn">搜索</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="left-panel">
+                    <div class="search-results" id="searchResults">
+                        <div class="welcome-message">
+                            <h2>欢迎使用QQ音乐播放器</h2>
+                            <p>在搜索框中输入歌曲名或歌手名开始搜索</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <div class="playlist-section">
+                        <div class="playlist-header">
+                            <h3>播放列表</h3>
+                            <button id="clearPlaylist" class="clear-btn">清空列表</button>
+                        </div>
+                        <div class="playlist" id="playlist">
+                            <div class="empty-playlist">
+                                <p>播放列表为空</p>
+                                <p>搜索歌曲并点击添加到播放列表</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="player-section" id="playerSection" style="display: none;">
+                <div class="current-song">
+                    <div class="song-info">
+                        <img id="songImage" src="" alt="专辑封面" class="album-cover">
+                        <div class="song-details">
+                            <h3 id="songTitle">歌曲标题</h3>
+                            <p id="songArtist">歌手</p>
+                            <p id="songAlbum">专辑</p>
+                        </div>
+                    </div>
+                    <div class="player-controls">
+                        <div class="control-buttons">
+                            <button id="prevBtn" class="control-btn" title="上一首">⏮</button>
+                            <button id="playPauseBtn" class="control-btn play-pause" title="播放/暂停">▶</button>
+                            <button id="nextBtn" class="control-btn" title="下一首">⏭</button>
+                        </div>
+                        <div class="progress-container">
+                            <span id="currentTime">0:00</span>
+                            <div class="progress-bar">
+                                <div class="progress" id="progress"></div>
+                                <input type="range" id="progressSlider" min="0" max="100" value="0" class="progress-slider">
+                            </div>
+                            <span id="duration">0:00</span>
+                        </div>
+                        <div class="volume-container">
+                            <span class="volume-icon">🔊</span>
+                            <input type="range" id="volumeSlider" min="0" max="100" value="50" class="volume-slider">
+                            <span id="volumeValue">50%</span>
+                        </div>
+                        <div class="play-info">
+                            <span id="playStatus">准备播放</span>
+                        </div>
+                    </div>
+                </div>
+                <audio id="audioPlayer" preload="none">
+                    您的浏览器不支持音频播放
+                </audio>
+            </div>
+        </main>
+
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>正在搜索...</p>
+        </div>
+    </div>
+
+    <script src="music-player.js"></script>
+</body>
+</html>
