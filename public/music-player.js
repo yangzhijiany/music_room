@@ -147,7 +147,7 @@ class MusicPlayer {
                     <div class="song-title">${this.escapeHtml(song.songname)}</div>
                     <div class="song-artist">${this.escapeHtml(song.singer[0].name)}</div>
                 </div>
-                <button class="play-btn" onclick="musicPlayer.addToPlaylist('${song.songmid}', '${song.songid}', '${this.escapeHtml(song.songname)}', '${this.escapeHtml(song.singer[0].name)}', '${this.escapeHtml(song.albumname)}', '${song.albummid}')">
+                <button class="play-btn" onclick="musicPlayer.addToPlaylist('${song.songmid}', '${song.songid}', '${this.escapeJsString(song.songname)}', '${this.escapeJsString(song.singer[0].name)}', '${this.escapeJsString(song.albumname)}', '${song.albummid}')">
                     ➕
                 </button>
             </div>
@@ -388,6 +388,18 @@ class MusicPlayer {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // 转义JavaScript字符串中的特殊字符
+    escapeJsString(text) {
+        if (!text) return '';
+        return text.toString()
+            .replace(/\\/g, '\\\\')  // 反斜杠
+            .replace(/'/g, "\\'")    // 单引号
+            .replace(/"/g, '\\"')    // 双引号
+            .replace(/\n/g, '\\n')   // 换行符
+            .replace(/\r/g, '\\r')   // 回车符
+            .replace(/\t/g, '\\t');  // 制表符
     }
 
     showLoading(show) {
