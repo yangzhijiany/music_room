@@ -591,7 +591,7 @@
                 const playInfo = data.data.playUrl[song.songmid];
                 
                 // 检查是否有错误信息
-                if (playInfo.error) {
+                if (playInfo.error && playInfo.error !== false) {
                     throw new Error(playInfo.error);
                 }
                 
