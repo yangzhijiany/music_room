@@ -588,7 +588,14 @@
             const data = await response.json();
             
             if (data.data && data.data.playUrl && data.data.playUrl[song.songmid]) {
-                const playUrl = data.data.playUrl[song.songmid].url;
+                const playInfo = data.data.playUrl[song.songmid];
+                
+                // 检查是否有错误信息
+                if (playInfo.error) {
+                    throw new Error(playInfo.error);
+                }
+                
+                const playUrl = playInfo.url;
                 
                 if (playUrl) {
                     console.log('设置音频源:', playUrl);

@@ -267,7 +267,14 @@ class MusicPlayer {
             const playData = await playResponse.json();
 
             if (playData.data && playData.data.playUrl && playData.data.playUrl[song.songmid]) {
-                const playUrl = playData.data.playUrl[song.songmid].url;
+                const playInfo = playData.data.playUrl[song.songmid];
+                
+                // 检查是否有错误信息
+                if (playInfo.error) {
+                    throw new Error(playInfo.error);
+                }
+                
+                const playUrl = playInfo.url;
                 
                 if (playUrl) {
                     // 设置音频源
