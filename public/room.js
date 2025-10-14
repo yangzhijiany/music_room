@@ -1,6 +1,7 @@
 ﻿class RoomMusicPlayer {
     constructor() {
-        this.apiBase = 'http://localhost:3200';
+        // 自动检测当前域名和端口
+        this.apiBase = window.location.origin;
         this.socket = null;
         this.currentRoom = null;
         this.currentUser = null;

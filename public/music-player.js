@@ -1,6 +1,7 @@
 class MusicPlayer {
     constructor() {
-        this.apiBase = 'http://localhost:3200';
+        // 自动检测当前域名和端口
+        this.apiBase = window.location.origin;
         this.playlist = [];
         this.currentIndex = -1;
         this.isPlaying = false;
