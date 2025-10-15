@@ -146,7 +146,10 @@
         this.audioPlayer.addEventListener('loadedmetadata', () => {
             this.durationEl.textContent = this.formatTime(this.audioPlayer.duration);
         });
-        this.audioPlayer.addEventListener('ended', () => this.playNext());
+        this.audioPlayer.addEventListener('ended', () => {
+            // 歌曲播放完成，通知服务器
+            this.socket.emit('song_finished');
+        });
         this.audioPlayer.addEventListener('error', (e) => {
             this.showError('音频加载失败');
         });
@@ -193,6 +196,30 @@
         
         this.socket.on('playlist_updated', (data) => {
             this.playlist = data.playlist;
+            this.currentRoom.playlist = this.playlist;
+            
+            // 更新当前播放状态
+            if (typeof data.currentIndex !== 'undefined') {
+                this.currentIndex = data.currentIndex;
+            }
+            if (typeof data.isPlaying !== 'undefined') {
+                this.isPlaying = data.isPlaying;
+                this.playPauseBtn.textContent = data.isPlaying ? '⏸' : '▶';
+            }
+            if (data.currentSong) {
+                this.updatePlayerInfo(data.currentSong);
+                this.playerSection.style.display = 'block';
+                // 如果删除了当前播放的歌曲，自动播放下一首
+                if (data.isPlaying && data.currentSong) {
+                    this.loadAndPlaySong(data.currentSong, 0);
+                }
+            } else if (this.playlist.length === 0) {
+                // 播放列表为空，隐藏播放器
+                this.playerSection.style.display = 'none';
+                this.audioPlayer.pause();
+                this.audioPlayer.currentTime = 0;
+            }
+            
             this.updatePlaylistDisplay();
             
             if (data.addedBy) {
@@ -206,7 +233,9 @@
         
         this.socket.on('playback_started', (data) => {
             this.currentIndex = data.currentIndex;
-            this.playlist = this.currentRoom.playlist;
+            // 使用服务器返回的播放列表，而不是本地缓存的
+            this.playlist = data.playlist || this.currentRoom.playlist;
+            this.currentRoom.playlist = this.playlist; // 同步更新房间的播放列表
             this.isPlaying = true;
             this.playPauseBtn.textContent = '⏸';
             this.updatePlaylistDisplay();
@@ -243,6 +272,32 @@
             
             if (data.toggledBy) {
                 this.addSystemMessage(`${data.toggledBy} ${data.isPlaying ? '恢复' : '暂停'}了播放`);
+            }
+        });
+        
+        this.socket.on('song_finished', (data) => {
+            // 歌曲播放完成，更新播放列表和当前播放状态
+            this.playlist = data.playlist;
+            this.currentRoom.playlist = this.playlist;
+            this.currentIndex = data.currentIndex;
+            this.isPlaying = data.isPlaying;
+            this.playPauseBtn.textContent = data.isPlaying ? '⏸' : '▶';
+            this.updatePlaylistDisplay();
+            
+            if (data.currentSong) {
+                // 有下一首歌曲，更新播放器信息并播放
+                this.updatePlayerInfo(data.currentSong);
+                this.playerSection.style.display = 'block';
+                this.loadAndPlaySong(data.currentSong, data.currentTime ?? 0);
+            } else {
+                // 没有下一首歌曲，隐藏播放器
+                this.playerSection.style.display = 'none';
+                this.audioPlayer.pause();
+                this.audioPlayer.currentTime = 0;
+            }
+            
+            if (data.message) {
+                this.addSystemMessage(data.message);
             }
         });
         
@@ -507,7 +562,13 @@
 
     // 同步播放
     syncPlayback(data) {
-        if (!data.currentSong) return;
+        if (!data.currentSong) {
+            // 没有当前歌曲，隐藏播放器
+            this.playerSection.style.display = 'none';
+            this.audioPlayer.pause();
+            this.audioPlayer.currentTime = 0;
+            return;
+        }
         
         const previousSongMid = this.currentSongMid;
         const incomingSongMid = data.currentSong.songmid;

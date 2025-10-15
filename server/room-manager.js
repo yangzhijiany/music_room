@@ -140,32 +140,36 @@ class RoomManager {
 
         const removedSong = room.playlist.splice(index, 1)[0];
         
-        // 调整当前播放索引
-		if (index < room.currentIndex) {
-			room.currentIndex--;
-		} else if (index === room.currentIndex) {
-			if (room.playlist.length === 0) {
-				room.currentIndex = -1;
-				room.currentSong = null;
-				room.isPlaying = false;
-				room.startTime = null;
-				room.playbackOffset = 0;
-			} else if (room.currentIndex >= room.playlist.length) {
-				room.currentIndex = room.playlist.length - 1;
-				room.currentSong = room.playlist[room.currentIndex];
-				room.isPlaying = false;
-				room.startTime = null;
-				room.playbackOffset = 0;
-			} else {
-				room.currentSong = room.playlist[room.currentIndex];
-				room.isPlaying = false;
-				room.startTime = null;
-				room.playbackOffset = 0;
-			}
-		}
+        // 调整当前播放索引（在新的队列管理模式下，当前播放歌曲总是在索引0）
+        if (index === 0 && room.currentIndex === 0) {
+            // 删除的是当前正在播放的歌曲
+            if (room.playlist.length === 0) {
+                room.currentIndex = -1;
+                room.currentSong = null;
+                room.isPlaying = false;
+                room.startTime = null;
+                room.playbackOffset = 0;
+            } else {
+                // 播放下一首歌曲（新的头部）
+                room.currentIndex = 0;
+                room.currentSong = room.playlist[0];
+                room.isPlaying = true;
+                room.playbackOffset = 0;
+                room.startTime = Date.now();
+            }
+        } else if (index < room.currentIndex) {
+            // 删除的歌曲在当前播放歌曲之前，调整索引
+            room.currentIndex--;
+        }
 
         console.log(`歌曲 ${removedSong.title} 从房间 ${roomId} 的播放列表删除`);
-        return { success: true, playlist: room.playlist, currentIndex: room.currentIndex };
+        return { 
+            success: true, 
+            playlist: room.playlist, 
+            currentIndex: room.currentIndex,
+            currentSong: room.currentSong,
+            isPlaying: room.isPlaying
+        };
     }
 
     // 清空播放列表
@@ -197,8 +201,15 @@ class RoomManager {
             return { success: false, error: '索引无效' };
         }
 
-		room.currentIndex = index;
-		room.currentSong = room.playlist[index];
+        // 如果点击播放列表中的歌曲，移除该歌曲之前的所有歌曲
+        if (index > 0) {
+            room.playlist.splice(0, index);
+            room.currentIndex = 0; // 现在要播放的歌曲在列表头部
+        } else {
+            room.currentIndex = index;
+        }
+
+		room.currentSong = room.playlist[room.currentIndex];
 		room.isPlaying = true;
 		room.playbackOffset = 0;
 		room.startTime = Date.now();
@@ -208,6 +219,7 @@ class RoomManager {
             success: true, 
             currentSong: room.currentSong, 
             currentIndex: room.currentIndex,
+            playlist: room.playlist, // 返回更新后的播放列表
             startTime: room.startTime,
             currentTime: this._getElapsedSeconds(room)
         };
@@ -247,8 +259,8 @@ class RoomManager {
 		};
     }
 
-    // 上一首
-    playPrevious(roomId) {
+    // 歌曲播放完成，自动播放下一首并移除当前歌曲
+    onSongFinished(roomId) {
         const room = this.rooms.get(roomId);
         if (!room) {
             return { success: false, error: '房间不存在' };
@@ -258,19 +270,58 @@ class RoomManager {
             return { success: false, error: '播放列表为空' };
         }
 
-		room.currentIndex = room.currentIndex > 0 ? room.currentIndex - 1 : room.playlist.length - 1;
-		room.currentSong = room.playlist[room.currentIndex];
-		room.isPlaying = true;
-		room.playbackOffset = 0;
-		room.startTime = Date.now();
+        // 移除当前播放的歌曲（列表头部的歌曲）
+        const finishedSong = room.playlist.shift();
+        console.log(`房间 ${roomId} 歌曲播放完成，已移除: ${finishedSong.title}`);
 
-        console.log(`房间 ${roomId} 播放上一首: ${room.currentSong.title}`);
+        // 检查是否还有歌曲
+        if (room.playlist.length === 0) {
+            // 播放列表为空，停止播放
+            room.currentIndex = -1;
+            room.currentSong = null;
+            room.isPlaying = false;
+            room.startTime = null;
+            room.playbackOffset = 0;
+            
+            return {
+                success: true,
+                currentSong: null,
+                currentIndex: -1,
+                playlist: room.playlist,
+                isPlaying: false,
+                message: '播放列表已清空'
+            };
+        } else {
+            // 播放下一首歌曲（现在是列表头部）
+            room.currentIndex = 0;
+            room.currentSong = room.playlist[0];
+            room.isPlaying = true;
+            room.playbackOffset = 0;
+            room.startTime = Date.now();
+
+            console.log(`房间 ${roomId} 自动播放下一首: ${room.currentSong.title}`);
+            return {
+                success: true,
+                currentSong: room.currentSong,
+                currentIndex: room.currentIndex,
+                playlist: room.playlist,
+                startTime: room.startTime,
+                currentTime: this._getElapsedSeconds(room),
+                message: `自动播放下一首: ${room.currentSong.title}`
+            };
+        }
+    }
+
+    // 上一首（在新的队列管理模式下，上一首功能被禁用，因为已播放的歌曲已被移除）
+    playPrevious(roomId) {
+        const room = this.rooms.get(roomId);
+        if (!room) {
+            return { success: false, error: '房间不存在' };
+        }
+
         return { 
-            success: true, 
-            currentSong: room.currentSong, 
-            currentIndex: room.currentIndex,
-            startTime: room.startTime,
-            currentTime: this._getElapsedSeconds(room)
+            success: false, 
+            error: '上一首功能已禁用，因为已播放的歌曲会自动从列表中移除' 
         };
     }
 
@@ -285,17 +336,41 @@ class RoomManager {
             return { success: false, error: '播放列表为空' };
         }
 
-		room.currentIndex = room.currentIndex < room.playlist.length - 1 ? room.currentIndex + 1 : 0;
-		room.currentSong = room.playlist[room.currentIndex];
-		room.isPlaying = true;
-		room.playbackOffset = 0;
-		room.startTime = Date.now();
+        // 移除当前歌曲，播放下一首（新的头部歌曲）
+        const currentSong = room.playlist.shift();
+        console.log(`房间 ${roomId} 手动切换到下一首，已移除: ${currentSong.title}`);
+
+        if (room.playlist.length === 0) {
+            // 没有下一首了
+            room.currentIndex = -1;
+            room.currentSong = null;
+            room.isPlaying = false;
+            room.startTime = null;
+            room.playbackOffset = 0;
+            
+            return {
+                success: true,
+                currentSong: null,
+                currentIndex: -1,
+                playlist: room.playlist,
+                isPlaying: false,
+                message: '没有下一首歌曲'
+            };
+        }
+
+        // 播放下一首歌曲（现在是列表头部）
+        room.currentIndex = 0;
+        room.currentSong = room.playlist[0];
+        room.isPlaying = true;
+        room.playbackOffset = 0;
+        room.startTime = Date.now();
 
         console.log(`房间 ${roomId} 播放下一首: ${room.currentSong.title}`);
         return { 
             success: true, 
             currentSong: room.currentSong, 
             currentIndex: room.currentIndex,
+            playlist: room.playlist,
             startTime: room.startTime,
             currentTime: this._getElapsedSeconds(room)
         };

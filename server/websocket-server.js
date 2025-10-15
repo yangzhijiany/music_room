@@ -136,6 +136,8 @@ class WebSocketServer {
                     this.io.to(user.roomId).emit('playlist_updated', {
                         playlist: result.playlist,
                         currentIndex: result.currentIndex,
+                        currentSong: result.currentSong,
+                        isPlaying: result.isPlaying,
                         removedBy: user.name
                     });
                 } else {
@@ -178,6 +180,7 @@ class WebSocketServer {
                     this.io.to(user.roomId).emit('playback_started', {
                         currentSong: result.currentSong,
                         currentIndex: result.currentIndex,
+                        playlist: result.playlist, // 包含更新后的播放列表
                         startTime: result.startTime,
                         currentTime: result.currentTime,
                         playedBy: user.name
@@ -246,9 +249,35 @@ class WebSocketServer {
                     this.io.to(user.roomId).emit('playback_started', {
                         currentSong: result.currentSong,
                         currentIndex: result.currentIndex,
+                        playlist: result.playlist, // 包含更新后的播放列表
                         startTime: result.startTime,
                         currentTime: result.currentTime,
                         playedBy: user.name
+                    });
+                } else {
+                    socket.emit('error', { message: result.error });
+                }
+            });
+
+            // 歌曲播放完成
+            socket.on('song_finished', () => {
+                const user = this.roomManager.getUser(socket.id);
+                if (!user) {
+                    socket.emit('error', { message: '用户未加入房间' });
+                    return;
+                }
+
+                const result = this.roomManager.onSongFinished(user.roomId);
+                if (result.success) {
+                    // 广播给房间内所有用户
+                    this.io.to(user.roomId).emit('song_finished', {
+                        currentSong: result.currentSong,
+                        currentIndex: result.currentIndex,
+                        playlist: result.playlist, // 包含更新后的播放列表
+                        isPlaying: result.isPlaying,
+                        startTime: result.startTime,
+                        currentTime: result.currentTime,
+                        message: result.message
                     });
                 } else {
                     socket.emit('error', { message: result.error });
