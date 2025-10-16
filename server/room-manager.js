@@ -21,7 +21,10 @@ class RoomManager {
 			isPlaying: false,
 			startTime: null,
 			playbackOffset: 0,
-			createdAt: Date.now()
+			createdAt: Date.now(),
+			// 防止歌曲结束被重复处理
+			finishingLock: false,
+			lastFinishAt: 0
 		};
         
         this.rooms.set('MAIN', mainRoom);
@@ -41,7 +44,10 @@ class RoomManager {
 			isPlaying: false,
 			startTime: null,
 			playbackOffset: 0,
-			createdAt: Date.now()
+			createdAt: Date.now(),
+			// 防止歌曲结束被重复处理
+			finishingLock: false,
+			lastFinishAt: 0
 		};
         
         this.rooms.set(roomId, room);
@@ -266,6 +272,23 @@ class RoomManager {
             return { success: false, error: '房间不存在' };
         }
 
+        const now = Date.now();
+        // 防重入与抖动保护：如果刚处理过完成事件，则直接返回当前状态，避免双重 shift 导致跳歌
+        if (room.finishingLock || (now - (room.lastFinishAt || 0) < 1000)) {
+            return {
+                success: true,
+                currentSong: room.currentSong,
+                currentIndex: room.currentIndex,
+                playlist: room.playlist,
+                isPlaying: room.isPlaying,
+                startTime: room.startTime,
+                currentTime: this._getElapsedSeconds(room),
+                message: '已忽略重复的歌曲结束事件'
+            };
+        }
+
+        room.finishingLock = true;
+
         if (room.playlist.length === 0) {
             return { success: false, error: '播放列表为空' };
         }
@@ -282,6 +305,8 @@ class RoomManager {
             room.isPlaying = false;
             room.startTime = null;
             room.playbackOffset = 0;
+            room.lastFinishAt = now;
+            room.finishingLock = false;
             
             return {
                 success: true,
@@ -298,6 +323,8 @@ class RoomManager {
             room.isPlaying = true;
             room.playbackOffset = 0;
             room.startTime = Date.now();
+            room.lastFinishAt = now;
+            room.finishingLock = false;
 
             console.log(`房间 ${roomId} 自动播放下一首: ${room.currentSong.title}`);
             return {
