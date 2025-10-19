@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QQ音乐播放器</title>
+    <title>QQ Music Player</title>
     <link rel="stylesheet" href="music-player.css">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>🎵 QQ音乐播放器</h1>
+            <h1>🎵 QQ Music Player</h1>
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="搜索歌曲、歌手..." class="search-input">
-                <button id="searchBtn" class="search-btn">搜索</button>
+                <input type="text" id="searchInput" placeholder="Search songs, artists..." class="search-input">
+                <button id="searchBtn" class="search-btn">Search</button>
             </div>
         </header>
 
@@ -21,8 +21,8 @@
                 <div class="left-panel">
                     <div class="search-results" id="searchResults">
                         <div class="welcome-message">
-                            <h2>欢迎使用QQ音乐播放器</h2>
-                            <p>在搜索框中输入歌曲名或歌手名开始搜索</p>
+                            <h2>Welcome to QQ Music Player</h2>
+                            <p>Enter song name or artist name in the search box to start searching</p>
                         </div>
                     </div>
                 </div>
@@ -30,13 +30,13 @@
                 <div class="right-panel">
                     <div class="playlist-section">
                         <div class="playlist-header">
-                            <h3>播放列表</h3>
-                            <button id="clearPlaylist" class="clear-btn">清空列表</button>
+                            <h3>Playlist</h3>
+                            <button id="clearPlaylist" class="clear-btn">Clear List</button>
                         </div>
                         <div class="playlist" id="playlist">
                             <div class="empty-playlist">
-                                <p>播放列表为空</p>
-                                <p>搜索歌曲并点击添加到播放列表</p>
+                                <p>Playlist is empty</p>
+                                <p>Search for songs and click to add to playlist</p>
                             </div>
                         </div>
                     </div>
@@ -46,18 +46,18 @@
             <div class="player-section" id="playerSection" style="display: none;">
                 <div class="current-song">
                     <div class="song-info">
-                        <img id="songImage" src="" alt="专辑封面" class="album-cover">
+                        <img id="songImage" src="" alt="Album Cover" class="album-cover">
                         <div class="song-details">
-                            <h3 id="songTitle">歌曲标题</h3>
-                            <p id="songArtist">歌手</p>
-                            <p id="songAlbum">专辑</p>
+                            <h3 id="songTitle">Song Title</h3>
+                            <p id="songArtist">Artist</p>
+                            <p id="songAlbum">Album</p>
                         </div>
                     </div>
                     <div class="player-controls">
                         <div class="control-buttons">
-                            <button id="prevBtn" class="control-btn" title="上一首">⏮</button>
-                            <button id="playPauseBtn" class="control-btn play-pause" title="播放/暂停">▶</button>
-                            <button id="nextBtn" class="control-btn" title="下一首">⏭</button>
+                            <button id="prevBtn" class="control-btn" title="Previous">⏮</button>
+                            <button id="playPauseBtn" class="control-btn play-pause" title="Play/Pause">▶</button>
+                            <button id="nextBtn" class="control-btn" title="Next">⏭</button>
                         </div>
                         <div class="progress-container">
                             <span id="currentTime">0:00</span>
@@ -73,19 +73,19 @@
                             <span id="volumeValue">50%</span>
                         </div>
                         <div class="play-info">
-                            <span id="playStatus">准备播放</span>
+                            <span id="playStatus">Ready to play</span>
                         </div>
                     </div>
                 </div>
                 <audio id="audioPlayer" preload="none">
-                    您的浏览器不支持音频播放
+                    Your browser does not support audio playback
                 </audio>
             </div>
         </main>
 
         <div class="loading" id="loading" style="display: none;">
             <div class="spinner"></div>
-            <p>正在搜索...</p>
+            <p>Searching...</p>
         </div>
     </div>
 

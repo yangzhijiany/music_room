@@ -1,6 +1,6 @@
 ﻿class RoomMusicPlayer {
     constructor() {
-        // 自动检测当前域名和端口
+        // Auto detect current domain and port
         this.apiBase = window.location.origin;
         this.socket = null;
         this.currentRoom = null;
@@ -15,23 +15,23 @@
         this.pendingSeekTime = null;
         this.lastSyncAt = 0;
         
-        // DOM元素
+        // DOM elements
         this.entryPage = document.getElementById('entryPage');
         this.roomPage = document.getElementById('roomPage');
         this.loading = document.getElementById('loading');
         this.errorToast = document.getElementById('errorToast');
         
-        // 入口页面元素
+        // Entry page elements
         this.enterRoomBtn = document.getElementById('enterRoomBtn');
         this.userName = document.getElementById('userName');
         
-        // 房间页面元素
+        // Room page elements
         this.roomTitle = document.getElementById('roomTitle');
         this.userCount = document.getElementById('userCount');
         this.shareRoomBtn = document.getElementById('shareRoomBtn');
         this.leaveRoomBtn = document.getElementById('leaveRoomBtn');
         
-        // 搜索和播放列表
+        // Search and playlist
         this.searchInput = document.getElementById('searchInput');
         this.searchBtn = document.getElementById('searchBtn');
         this.searchResults = document.getElementById('searchResults');
@@ -43,10 +43,10 @@
         this.chatInput = document.getElementById('chatInput');
         this.sendMessageBtn = document.getElementById('sendMessageBtn');
         
-        // 用户列表
+        // User list
         this.usersList = document.getElementById('usersList');
         
-        // 播放器
+        // Player
         this.audioPlayer = document.getElementById('audioPlayer');
         this.playerSection = document.getElementById('playerSection');
         this.playPauseBtn = document.getElementById('playPauseBtn');
@@ -63,70 +63,70 @@
         this.initAudioEventHandlers();
     }
 
-    // 初始化音频事件处理函数
+    // Initialize audio event handlers
     initAudioEventHandlers() {
         this.onAudioLoadStart = () => {
-            console.log('音频开始加载...');
+            console.log('Audio started loading...');
         };
 
         this.onAudioCanPlay = () => {
-            console.log('音频可以播放');
+            console.log('Audio can play');
             this.isLoading = false;
             this.showLoading(false);
             this.currentLoadingSong = null;
             this.applyPendingSeek();
             
-            // 如果当前应该播放，则自动播放
+            // If should be playing, auto play
             if (this.isPlaying) {
                 this.audioPlayer.play().catch(e => {
                     console.warn('自动播放失败:', e);
-                    this.showError('自动播放失败，请手动点击播放');
+                    this.showError('Auto play failed, please click play manually');
                 });
             }
         };
 
         this.onAudioLoaded = () => {
-            console.log('音频数据加载完成');
+            console.log('Audio data loaded');
         };
 
         this.onAudioError = (e) => {
-            console.error('音频加载错误:', e);
+            console.error('Audio loading error:', e);
             this.isLoading = false;
             this.showLoading(false);
             this.currentLoadingSong = null;
-            this.showError('音频加载失败，请重试');
+            this.showError('Audio loading failed, please try again');
         };
     }
 
     initEventListeners() {
-        // 入口页面事件
+        // Entry page events
         this.enterRoomBtn.addEventListener('click', () => this.enterRoom());
         
-        // 房间页面事件
+        // Room page events
         this.shareRoomBtn.addEventListener('click', () => this.shareRoom());
         this.leaveRoomBtn.addEventListener('click', () => this.leaveRoom());
         
-        // 搜索事件
+        // Search events
         this.searchBtn.addEventListener('click', () => this.searchMusic());
         this.searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.searchMusic();
         });
         
-        // 播放列表事件
+        // Playlist events
         this.clearPlaylistBtn.addEventListener('click', () => this.clearPlaylist());
         
-        // 聊天事件
+        // Chat events
         this.sendMessageBtn.addEventListener('click', () => this.sendMessage());
         this.chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.sendMessage();
         });
         
-        // 播放控制事件
+        // Playback control events
         this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
         this.prevBtn.addEventListener('click', () => this.playPrevious());
         this.nextBtn.addEventListener('click', () => this.playNext());
         
-        // 进度控制
+        // Progress control
         this.progressSlider.addEventListener('input', (e) => {
             if (this.audioPlayer.duration) {
                 const time = (e.target.value / 100) * this.audioPlayer.duration;
@@ -134,14 +134,14 @@
             }
         });
         
-        // 音量控制
+        // Volume control
         this.volumeSlider.addEventListener('input', (e) => {
             const volume = e.target.value / 100;
             this.audioPlayer.volume = volume;
             this.volumeValueEl.textContent = e.target.value + '%';
         });
         
-        // 音频事件
+        // Audio events
         this.audioPlayer.addEventListener('timeupdate', () => this.updateProgress());
         this.audioPlayer.addEventListener('loadedmetadata', () => {
             this.durationEl.textContent = this.formatTime(this.audioPlayer.duration);
@@ -151,24 +151,24 @@
             this.socket.emit('song_finished');
         });
         this.audioPlayer.addEventListener('error', (e) => {
-            this.showError('音频加载失败');
+            this.showError('Audio loading failed');
         });
         
-        // 初始化音量
+        // Initialize volume
         this.audioPlayer.volume = 0.5;
     }
 
-    // 连接WebSocket
+    // Connect WebSocket
     connectSocket() {
         this.socket = io();
         
         this.socket.on('connect', () => {
-            console.log('WebSocket连接成功');
+            console.log('WebSocket connected successfully');
         });
         
         this.socket.on('disconnect', () => {
-            console.log('WebSocket连接断开');
-            this.showError('连接断开，正在重连...');
+            console.log('WebSocket disconnected');
+            this.showError('Connection lost, reconnecting...');
         });
         
         this.socket.on('room_created', (data) => {
@@ -198,7 +198,7 @@
             this.playlist = data.playlist;
             this.currentRoom.playlist = this.playlist;
             
-            // 更新当前播放状态
+            // Update current playback state
             if (typeof data.currentIndex !== 'undefined') {
                 this.currentIndex = data.currentIndex;
             }
@@ -209,12 +209,12 @@
             if (data.currentSong) {
                 this.updatePlayerInfo(data.currentSong);
                 this.playerSection.style.display = 'block';
-                // 如果删除了当前播放的歌曲，自动播放下一首
+                // If current playing song is deleted, auto play next
                 if (data.isPlaying && data.currentSong) {
                     this.loadAndPlaySong(data.currentSong, 0);
                 }
             } else if (this.playlist.length === 0) {
-                // 播放列表为空，隐藏播放器
+                // Playlist is empty, hide player
                 this.playerSection.style.display = 'none';
                 this.audioPlayer.pause();
                 this.audioPlayer.currentTime = 0;
@@ -314,32 +314,32 @@
         });
     }
 
-    // 进入房间
+    // Enter room
     enterRoom() {
         const userName = this.userName.value.trim();
         
         if (!userName) {
-            this.showError('请输入昵称');
+            this.showError('Please enter nickname');
             return;
         }
         
-        this.showLoading(true, '正在进入房间...');
+        this.showLoading(true, 'Entering room...');
         this.connectSocket();
         
-        // 直接加入固定房间 "MAIN"
+        // Join fixed room "MAIN" directly
         this.socket.emit('join_room', {
             roomId: 'MAIN',
             userName: userName
         });
     }
 
-    // 显示房间页面
+    // Show room page
     showRoomPage() {
         this.entryPage.style.display = 'none';
         this.roomPage.style.display = 'flex';
         this.loading.style.display = 'none';
         
-        this.roomTitle.textContent = '同步听歌房间';
+        this.roomTitle.textContent = 'Sync Music Room';
         this.userCount.textContent = this.currentRoom.users.size;
         
         this.updatePlaylistDisplay();
@@ -352,9 +352,9 @@
         this.startSyncCheck();
     }
 
-    // 离开房间
+    // Leave room
     leaveRoom() {
-        if (confirm('确定要离开房间吗？')) {
+        if (confirm('Are you sure you want to leave the room?')) {
             this.socket.emit('leave_room');
             this.socket.disconnect();
             this.roomPage.style.display = 'none';
@@ -364,25 +364,25 @@
         }
     }
 
-    // 分享房间
+    // Share room
     shareRoom() {
         const url = window.location.href;
         navigator.clipboard.writeText(url).then(() => {
-            this.showError('房间链接已复制到剪贴板');
+            this.showError('Room link copied to clipboard');
         }).catch(() => {
-            this.showError('复制失败，请手动复制链接');
+            this.showError('Copy failed, please copy link manually');
         });
     }
 
-    // 搜索音乐
+    // Search music
     async searchMusic() {
         const keyword = this.searchInput.value.trim();
         if (!keyword) {
-            this.showError('请输入搜索关键词');
+            this.showError('Please enter search keywords');
             return;
         }
 
-        this.showLoading(true, '正在搜索...');
+        this.showLoading(true, 'Searching...');
         this.clearSearchResults();
 
         try {
@@ -392,17 +392,17 @@
             if (data.response && data.response.code === 0) {
                 this.displaySearchResults(data.response.data.song.list);
             } else {
-                this.showError('搜索失败，请重试');
+                this.showError('Search failed, please try again');
             }
         } catch (error) {
             console.error('搜索错误:', error);
-            this.showError('网络错误，请检查API服务是否正常运行');
+            this.showError('Network error, please check if API service is running normally');
         } finally {
             this.showLoading(false);
         }
     }
 
-    // 显示搜索结果
+    // Display search results
     displaySearchResults(songs) {
         if (!songs || songs.length === 0) {
             this.showNoResults();
@@ -426,7 +426,7 @@
         this.searchResults.innerHTML = resultsHTML;
     }
 
-    // 添加歌曲到播放列表
+    // Add song to playlist
     addToPlaylist(songmid, songid, title, artist, album, albummid) {
         const song = {
             songmid,
@@ -441,27 +441,27 @@
         this.socket.emit('add_to_playlist', { song });
     }
 
-    // 从播放列表删除歌曲
+    // Remove song from playlist
     removeFromPlaylist(index) {
         this.socket.emit('remove_from_playlist', { index });
     }
 
-    // 清空播放列表
+    // Clear playlist
     clearPlaylist() {
         if (this.playlist.length === 0) return;
         
-        if (confirm('确定要清空播放列表吗？')) {
+        if (confirm('Are you sure you want to clear the playlist?')) {
             this.socket.emit('clear_playlist');
         }
     }
 
-    // 更新播放列表显示
+    // Update playlist display
     updatePlaylistDisplay() {
         if (this.playlist.length === 0) {
             this.playlistContainer.innerHTML = `
                 <div class="empty-playlist">
-                    <p>播放列表为空</p>
-                    <p>搜索歌曲并添加到播放列表</p>
+                    <p>Playlist is empty</p>
+                    <p>Search for songs and add to playlist</p>
                 </div>
             `;
             return;
@@ -476,7 +476,7 @@
                     <div class="song-title">${this.escapeHtml(song.title)}</div>
                     <div class="song-artist">${this.escapeHtml(song.artist)}</div>
                 </div>
-                <button class="remove-btn" onclick="event.stopPropagation(); roomPlayer.removeFromPlaylist(${index})" title="删除">
+                <button class="remove-btn" onclick="event.stopPropagation(); roomPlayer.removeFromPlaylist(${index})" title="Remove">
                     ✕
                 </button>
             </div>
@@ -485,12 +485,12 @@
         this.playlistContainer.innerHTML = playlistHTML;
     }
 
-    // 从播放列表播放歌曲
+    // Play song from playlist
     playFromPlaylist(index) {
         this.socket.emit('play_song', { index });
     }
 
-    // 播放控制
+    // Playback control
     togglePlayPause() {
         this.socket.emit('toggle_play_pause');
     }
@@ -560,10 +560,10 @@
         return Math.abs(expected - actual) > tolerance;
     }
 
-    // 同步播放
+    // Sync playback
     syncPlayback(data) {
         if (!data.currentSong) {
-            // 没有当前歌曲，隐藏播放器
+            // No current song, hide player
             this.playerSection.style.display = 'none';
             this.audioPlayer.pause();
             this.audioPlayer.currentTime = 0;
@@ -618,7 +618,7 @@
         }
     }
 
-    // 更新播放器信息
+    // Update player info
     updatePlayerInfo(song) {
         document.getElementById('songTitle').textContent = song.title;
         document.getElementById('songArtist').textContent = song.artist;
@@ -626,15 +626,15 @@
         document.getElementById('songImage').src = song.imageUrl;
     }
 
-    // 加载并播放歌曲
+    // Load and play song
     async loadAndPlaySong(song, startAt = 0) {
         if (!song.songmid) {
-            this.showError('歌曲ID无效');
+            this.showError('Invalid song ID');
             return;
         }
 
         if (this.currentLoadingSong === song.songmid || this.isLoading) {
-            console.log('正在加载中，跳过重复请求');
+            console.log('Loading in progress, skipping duplicate request');
             return;
         }
 
@@ -643,7 +643,7 @@
 
         try {
             this.currentLoadingSong = song.songmid;
-            this.showLoading(true, '正在获取播放链接...');
+            this.showLoading(true, 'Getting playback link...');
             
             const response = await fetch(`${this.apiBase}/getMusicPlay?songmid=${song.songmid}`);
             const data = await response.json();
@@ -651,7 +651,7 @@
             if (data.data && data.data.playUrl && data.data.playUrl[song.songmid]) {
                 const playInfo = data.data.playUrl[song.songmid];
                 
-                // 检查是否有错误信息
+                // Check for error messages
                 if (playInfo.error && playInfo.error !== false) {
                     throw new Error(playInfo.error);
                 }
@@ -659,7 +659,7 @@
                 const playUrl = playInfo.url;
                 
                 if (playUrl) {
-                    console.log('设置音频源:', playUrl);
+                    console.log('Setting audio source:', playUrl);
                     
                     this.audioPlayer.pause();
                     this.audioPlayer.removeEventListener('loadstart', this.onAudioLoadStart);
@@ -690,8 +690,8 @@
                         this.currentLoadingSong = null;
                         this.audioPlayer.removeEventListener('canplay', handleCanPlay);
                         this.audioPlayer.removeEventListener('error', handleError);
-                        this.showError('音频加载超时，请重试');
-                        console.error('音频加载超时');
+                        this.showError('Audio loading timeout, please try again');
+                        console.error('Audio loading timeout');
                     }, 15000);
                     
                     this.audioPlayer.addEventListener('canplay', handleCanPlay, { once: true });
@@ -699,21 +699,21 @@
                     this.audioPlayer.addEventListener('loadstart', this.onAudioLoadStart, { once: true });
                     this.audioPlayer.addEventListener('loadeddata', this.onAudioLoaded, { once: true });
                 } else {
-                    throw new Error('该歌曲暂无播放链接');
+                    throw new Error('No playback link available for this song');
                 }
             } else {
-                throw new Error('获取播放链接失败');
+                    throw new Error('Failed to get playback link');
             }
         } catch (error) {
             this.showLoading(false);
             this.currentLoadingSong = null;
             console.error('获取播放链接错误:', error);
-            this.showError(error && error.message ? error.message : '获取播放链接失败，请重试');
+            this.showError(error && error.message ? error.message : 'Failed to get playback link, please try again');
         } finally {
             this.isLoading = false;
         }
     }
-    // 更新进度
+    // Update progress
     updateProgress() {
         if (this.audioPlayer.duration) {
             const progress = (this.audioPlayer.currentTime / this.audioPlayer.duration) * 100;
@@ -732,7 +732,7 @@
         }, 5000); // 每5秒同步一次
     }
 
-    // 停止同步检查
+    // Stop sync check
     stopSyncCheck() {
         if (this.syncInterval) {
             clearInterval(this.syncInterval);
@@ -740,7 +740,7 @@
         }
     }
 
-    // 重置播放器
+    // Reset player
     resetPlayer() {
         this.audioPlayer.pause();
         this.audioPlayer.currentTime = 0;
@@ -761,7 +761,7 @@
         this.chatInput.value = '';
     }
 
-    // 添加聊天消息
+    // Add chat message
     addChatMessage(message) {
         const messageEl = document.createElement('div');
         messageEl.className = `message ${message.user === this.currentUser.name ? 'user' : 'other'}`;
@@ -775,7 +775,7 @@
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }
 
-    // 添加系统消息
+    // Add system message
     addSystemMessage(content) {
         const messageEl = document.createElement('div');
         messageEl.className = 'message system';
@@ -785,7 +785,7 @@
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }
 
-    // 更新用户列表
+    // Update user list
     updateUserList(users) {
         if (!users) {
             users = this.currentRoom ? Array.from(this.currentRoom.users) : [];
@@ -803,7 +803,7 @@
     }
 
 
-    // 工具方法
+    // Utility methods
     formatTime(seconds) {
         if (isNaN(seconds)) return '0:00';
         const mins = Math.floor(seconds / 60);
@@ -822,19 +822,19 @@
         return div.innerHTML;
     }
 
-    // 转义JavaScript字符串中的特殊字符
+    // Escape special characters in JavaScript strings
     escapeJsString(text) {
         if (!text) return '';
         return text.toString()
-            .replace(/\\/g, '\\\\')  // 反斜杠
-            .replace(/'/g, "\\'")    // 单引号
-            .replace(/"/g, '\\"')    // 双引号
-            .replace(/\n/g, '\\n')   // 换行符
-            .replace(/\r/g, '\\r')   // 回车符
-            .replace(/\t/g, '\\t');  // 制表符
+            .replace(/\\/g, '\\\\')  // Backslash
+            .replace(/'/g, "\\'")    // Single quote
+            .replace(/"/g, '\\"')    // Double quote
+            .replace(/\n/g, '\\n')   // Line feed
+            .replace(/\r/g, '\\r')   // Carriage return
+            .replace(/\t/g, '\\t');  // Tab
     }
 
-    showLoading(show, text = '正在加载...') {
+    showLoading(show, text = 'Loading...') {
         this.loading.style.display = show ? 'flex' : 'none';
         document.getElementById('loadingText').textContent = text;
     }
@@ -854,16 +854,16 @@
     showNoResults() {
         this.searchResults.innerHTML = `
             <div class="no-results">
-                没有找到相关歌曲，请尝试其他关键词
+No related songs found, please try other keywords
             </div>
         `;
     }
 }
 
-// 初始化房间播放器
+// Initialize room player
 const roomPlayer = new RoomMusicPlayer();
 
-// 页面加载完成后的初始化
+// Initialize after page load
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('同步听歌房间已加载');
+    console.log('Sync music room loaded');
 });

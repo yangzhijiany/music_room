@@ -1,13 +1,13 @@
 class MusicPlayer {
     constructor() {
-        // 自动检测当前域名和端口
+        // Auto detect current domain and port
         this.apiBase = window.location.origin;
         this.playlist = [];
         this.currentIndex = -1;
         this.isPlaying = false;
         this.isLoading = false;
         
-        // DOM元素
+        // DOM elements
         this.audioPlayer = document.getElementById('audioPlayer');
         this.searchInput = document.getElementById('searchInput');
         this.searchBtn = document.getElementById('searchBtn');
@@ -17,7 +17,7 @@ class MusicPlayer {
         this.playlistContainer = document.getElementById('playlist');
         this.clearPlaylistBtn = document.getElementById('clearPlaylist');
         
-        // 播放控制元素
+        // Playback control elements
         this.playPauseBtn = document.getElementById('playPauseBtn');
         this.prevBtn = document.getElementById('prevBtn');
         this.nextBtn = document.getElementById('nextBtn');
@@ -33,7 +33,7 @@ class MusicPlayer {
     }
 
     initEventListeners() {
-        // 搜索相关
+        // Search related
         this.searchBtn.addEventListener('click', () => this.searchMusic());
         this.searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -41,15 +41,15 @@ class MusicPlayer {
             }
         });
 
-        // 播放列表相关
+        // Playlist related
         this.clearPlaylistBtn.addEventListener('click', () => this.clearPlaylist());
 
-        // 播放控制
+        // Playback control
         this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
         this.prevBtn.addEventListener('click', () => this.playPrevious());
         this.nextBtn.addEventListener('click', () => this.playNext());
 
-        // 进度控制
+        // Progress control
         this.progressSlider.addEventListener('input', (e) => {
             if (this.audioPlayer.duration) {
                 const time = (e.target.value / 100) * this.audioPlayer.duration;
@@ -57,32 +57,32 @@ class MusicPlayer {
             }
         });
 
-        // 音量控制
+        // Volume control
         this.volumeSlider.addEventListener('input', (e) => {
             const volume = e.target.value / 100;
             this.audioPlayer.volume = volume;
             this.volumeValueEl.textContent = e.target.value + '%';
         });
 
-        // 音频事件监听
+        // Audio event listeners
         this.audioPlayer.addEventListener('loadstart', () => {
-            this.updatePlayStatus('正在加载...');
+            this.updatePlayStatus('Loading...');
         });
 
         this.audioPlayer.addEventListener('canplay', () => {
-            this.updatePlayStatus('准备播放');
+            this.updatePlayStatus('Ready to play');
         });
 
         this.audioPlayer.addEventListener('play', () => {
             this.isPlaying = true;
             this.playPauseBtn.textContent = '⏸';
-            this.updatePlayStatus('正在播放');
+            this.updatePlayStatus('Playing');
         });
 
         this.audioPlayer.addEventListener('pause', () => {
             this.isPlaying = false;
             this.playPauseBtn.textContent = '▶';
-            this.updatePlayStatus('已暂停');
+            this.updatePlayStatus('Paused');
         });
 
         this.audioPlayer.addEventListener('ended', () => {
@@ -98,18 +98,18 @@ class MusicPlayer {
         });
 
         this.audioPlayer.addEventListener('error', (e) => {
-            this.updatePlayStatus('播放失败');
-            this.showError('音频加载失败，请尝试其他歌曲');
+            this.updatePlayStatus('Playback failed');
+            this.showError('Audio loading failed, please try other songs');
         });
 
-        // 初始化音量
+        // Initialize volume
         this.audioPlayer.volume = 0.5;
     }
 
     async searchMusic() {
         const keyword = this.searchInput.value.trim();
         if (!keyword) {
-            this.showError('请输入搜索关键词');
+            this.showError('Please enter search keywords');
             return;
         }
 
@@ -123,11 +123,11 @@ class MusicPlayer {
             if (data.response && data.response.code === 0) {
                 this.displaySearchResults(data.response.data.song.list);
             } else {
-                this.showError('搜索失败，请重试');
+                this.showError('Search failed, please try again');
             }
         } catch (error) {
             console.error('搜索错误:', error);
-            this.showError('网络错误，请检查API服务是否正常运行');
+            this.showError('Network error, please check if API service is running normally');
         } finally {
             this.showLoading(false);
         }
@@ -167,10 +167,10 @@ class MusicPlayer {
             imageUrl: this.getImageUrl(albummid)
         };
 
-        // 检查是否已存在
+        // Check if already exists
         const exists = this.playlist.some(s => s.songmid === songmid);
         if (exists) {
-            this.showError('歌曲已在播放列表中');
+            this.showError('Song is already in playlist');
             return;
         }
 
@@ -178,7 +178,7 @@ class MusicPlayer {
         this.updatePlaylistDisplay();
         this.savePlaylistToStorage();
         
-        // 如果播放列表为空，自动播放第一首
+        // If playlist is empty, auto play first song
         if (this.playlist.length === 1 && this.currentIndex === -1) {
             this.currentIndex = 0;
             this.playCurrentSong();
@@ -189,8 +189,8 @@ class MusicPlayer {
         if (this.playlist.length === 0) {
             this.playlistContainer.innerHTML = `
                 <div class="empty-playlist">
-                    <p>播放列表为空</p>
-                    <p>搜索歌曲并点击添加到播放列表</p>
+                    <p>Playlist is empty</p>
+                    <p>Search for songs and click to add to playlist</p>
                 </div>
             `;
             return;
@@ -205,7 +205,7 @@ class MusicPlayer {
                     <div class="song-title">${this.escapeHtml(song.title)}</div>
                     <div class="song-artist">${this.escapeHtml(song.artist)}</div>
                 </div>
-                <button class="remove-btn" onclick="event.stopPropagation(); musicPlayer.removeFromPlaylist(${index})" title="删除">
+                <button class="remove-btn" onclick="event.stopPropagation(); musicPlayer.removeFromPlaylist(${index})" title="Remove">
                     ✕
                 </button>
             </div>
@@ -222,7 +222,7 @@ class MusicPlayer {
     removeFromPlaylist(index) {
         this.playlist.splice(index, 1);
         
-        // 调整当前播放索引
+        // Adjust current playback index
         if (index < this.currentIndex) {
             this.currentIndex--;
         } else if (index === this.currentIndex) {
@@ -242,7 +242,7 @@ class MusicPlayer {
     clearPlaylist() {
         if (this.playlist.length === 0) return;
         
-        if (confirm('确定要清空播放列表吗？')) {
+        if (confirm('Are you sure you want to clear the playlist?')) {
             this.playlist = [];
             this.currentIndex = -1;
             this.stop();
@@ -253,23 +253,23 @@ class MusicPlayer {
 
     async playCurrentSong() {
         if (this.currentIndex < 0 || this.currentIndex >= this.playlist.length) {
-            this.updatePlayStatus('播放列表为空');
+            this.updatePlayStatus('Playlist is empty');
             return;
         }
 
         const song = this.playlist[this.currentIndex];
         this.isLoading = true;
-        this.updatePlayStatus('正在获取播放链接...');
+        this.updatePlayStatus('Getting playback link...');
 
         try {
-            // 获取播放链接
+            // Get playback link
             const playResponse = await fetch(`${this.apiBase}/getMusicPlay?songmid=${song.songmid}`);
             const playData = await playResponse.json();
 
             if (playData.data && playData.data.playUrl && playData.data.playUrl[song.songmid]) {
                 const playInfo = playData.data.playUrl[song.songmid];
                 
-                // 检查是否有错误信息
+                // Check for error messages
                 if (playInfo.error && playInfo.error !== false) {
                     throw new Error(playInfo.error);
                 }
@@ -277,34 +277,34 @@ class MusicPlayer {
                 const playUrl = playInfo.url;
                 
                 if (playUrl) {
-                    // 设置音频源
+                    // Set audio source
                     this.audioPlayer.src = playUrl;
                     
-                    // 更新播放器信息
+                    // Update player info
                     this.updatePlayerInfo(song);
                     
-                    // 显示播放器
+                    // Show player
                     this.playerSection.style.display = 'block';
                     
-                    // 更新播放列表显示
+                    // Update playlist display
                     this.updatePlaylistDisplay();
                     
-                    // 自动播放
+                    // Auto play
                     try {
                         await this.audioPlayer.play();
                     } catch (playError) {
                         console.warn('自动播放失败:', playError);
-                        this.updatePlayStatus('点击播放按钮开始播放');
+                        this.updatePlayStatus('Click play button to start');
                     }
                 } else {
-                    this.showError('该歌曲暂无播放链接');
+                    this.showError('No playback link available for this song');
                 }
             } else {
-                this.showError('获取播放链接失败');
+                this.showError('Failed to get playback link');
             }
         } catch (error) {
             console.error('播放错误:', error);
-            this.showError('播放失败，请重试');
+            this.showError('Playback failed, please try again');
         } finally {
             this.isLoading = false;
         }
@@ -345,7 +345,7 @@ class MusicPlayer {
         this.audioPlayer.currentTime = 0;
         this.isPlaying = false;
         this.playPauseBtn.textContent = '▶';
-        this.updatePlayStatus('已停止');
+        this.updatePlayStatus('Stopped');
         this.progress.style.width = '0%';
         this.progressSlider.value = 0;
         this.currentTimeEl.textContent = '0:00';
@@ -390,16 +390,16 @@ class MusicPlayer {
         return div.innerHTML;
     }
 
-    // 转义JavaScript字符串中的特殊字符
+    // Escape special characters in JavaScript strings
     escapeJsString(text) {
         if (!text) return '';
         return text.toString()
-            .replace(/\\/g, '\\\\')  // 反斜杠
-            .replace(/'/g, "\\'")    // 单引号
-            .replace(/"/g, '\\"')    // 双引号
-            .replace(/\n/g, '\\n')   // 换行符
-            .replace(/\r/g, '\\r')   // 回车符
-            .replace(/\t/g, '\\t');  // 制表符
+            .replace(/\\/g, '\\\\')  // Backslash
+            .replace(/'/g, "\\'")    // Single quote
+            .replace(/"/g, '\\"')    // Double quote
+            .replace(/\n/g, '\\n')   // Line feed
+            .replace(/\r/g, '\\r')   // Carriage return
+            .replace(/\t/g, '\\t');  // Tab
     }
 
     showLoading(show) {
@@ -417,7 +417,7 @@ class MusicPlayer {
     showNoResults() {
         this.searchResults.innerHTML = `
             <div class="no-results">
-                没有找到相关歌曲，请尝试其他关键词
+No related songs found, please try other keywords
             </div>
         `;
     }
@@ -426,7 +426,7 @@ class MusicPlayer {
         this.searchResults.innerHTML = '';
     }
 
-    // 本地存储功能
+    // Local storage functionality
     savePlaylistToStorage() {
         localStorage.setItem('musicPlayer_playlist', JSON.stringify(this.playlist));
         localStorage.setItem('musicPlayer_currentIndex', this.currentIndex.toString());
@@ -443,30 +443,30 @@ class MusicPlayer {
                 this.updatePlaylistDisplay();
             }
         } catch (error) {
-            console.error('加载播放列表失败:', error);
+            console.error('Failed to load playlist:', error);
         }
     }
 }
 
-// 初始化音乐播放器
+// Initialize music player
 const musicPlayer = new MusicPlayer();
 
-// 页面加载完成后的初始化
+// Initialize after page load
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('QQ音乐播放器已加载');
+    console.log('QQ Music Player loaded');
     
-    // 检查API连接
+    // Check API connection
     fetch('http://localhost:3200/getTopLists')
         .then(response => response.json())
         .then(data => {
             if (data.response && data.response.code === 0) {
-                console.log('API连接正常');
+                console.log('API connection normal');
             } else {
-                console.warn('API响应异常');
+                console.warn('API response abnormal');
             }
         })
         .catch(error => {
-            console.error('API连接失败:', error);
-            musicPlayer.showError('无法连接到音乐API服务，请确保服务正在运行');
+            console.error('API connection failed:', error);
+            musicPlayer.showError('Unable to connect to music API service, please ensure service is running');
         });
 });

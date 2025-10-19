@@ -18,7 +18,7 @@ body {
     min-height: 100vh;
 }
 
-/* 房间入口页面 */
+/* Room entry page */
 .entry-page {
     display: flex;
     align-items: center;
@@ -134,7 +134,7 @@ body {
     background: linear-gradient(45deg, #ff6b6b, #ee5a24);
 }
 
-/* 房间列表 */
+/* Room list */
 .room-list {
     margin-top: 30px;
     text-align: left;
@@ -177,7 +177,7 @@ body {
     color: #666;
 }
 
-/* 房间页面 */
+/* Room page */
 .room-page {
     display: flex;
     flex-direction: column;
@@ -220,7 +220,7 @@ body {
     gap: 20px;
 }
 
-/* 搜索区域 */
+/* Search area */
 .search-section {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 15px;
@@ -315,7 +315,7 @@ body {
     font-size: 14px;
 }
 
-/* 聊天区域 */
+/* Chat area */
 .chat-section {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 15px;
@@ -405,7 +405,7 @@ body {
     font-weight: bold;
 }
 
-/* 播放列表 */
+/* Playlist */
 .playlist-section {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 15px;
@@ -500,7 +500,7 @@ body {
     margin-left: 8px;
 }
 
-/* 用户列表 */
+/* User list */
 .users-section {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 15px;
@@ -532,7 +532,7 @@ body {
     color: #333;
 }
 
-/* 播放器 */
+/* Player */
 .player-section {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 15px;
@@ -675,7 +675,7 @@ body {
     font-size: 12px;
 }
 
-/* 加载和错误提示 */
+/* Loading and error prompts */
 .loading {
     position: fixed;
     top: 0;
@@ -728,7 +728,7 @@ body {
     to { transform: translateX(0); }
 }
 
-/* 响应式设计 */
+/* Responsive design */
 @media (max-width: 768px) {
     .container {
         padding: 10px;

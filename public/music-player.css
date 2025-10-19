@@ -191,7 +191,7 @@ body {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* 播放列表样式 */
+/* Playlist styles */
 .playlist-section {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
@@ -557,7 +557,7 @@ body {
     font-size: 18px;
 }
 
-/* 响应式设计 */
+/* Responsive design */
 @media (max-width: 768px) {
     .container {
         padding: 10px;
