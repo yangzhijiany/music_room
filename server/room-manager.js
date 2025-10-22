@@ -274,7 +274,7 @@ class RoomManager {
 
         const now = Date.now();
         // 防重入与抖动保护：如果刚处理过完成事件，则直接返回当前状态，避免双重 shift 导致跳歌
-        if (room.finishingLock || (now - (room.lastFinishAt || 0) < 1000)) {
+        if (room.finishingLock || (now - (room.lastFinishAt || 0) < 7000)) {
             return {
                 success: true,
                 currentSong: room.currentSong,
